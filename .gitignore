@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vercel/
+.env*
+init.py
+submit.py
+train.py
+datasets/
+runs/
+yolo26n-pose.pt

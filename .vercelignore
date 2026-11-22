@@ -1,0 +1,10 @@
+init.py
+submit.py
+train.py
+datasets/
+runs/
+__pycache__/
+yolo26n-pose.pt
+.git/
+.venv/
+venv/

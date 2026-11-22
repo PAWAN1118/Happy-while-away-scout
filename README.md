@@ -19,9 +19,9 @@ The current software only prototypes parts of this idea. It does not include the
 
 - A responsive SniffStation website with the existing Scout character and scent-hunt concept.
 - An optional browser camera preview.
-- A local Python API in `server.py` that receives individual camera frames while the page is open.
+- A FastAPI service in `server.py` that receives individual camera snapshots for dog detection. In a Vercel deployment, those snapshots are processed by Vercel.
 - Pretrained YOLO11 nano object detection for locating a dog in a frame.
-- Simple estimates based on the detected dog's bounding-box position over time: `moving`, `still`, `near_feeder`, or `not_visible`.
+- Simple estimates based on dog position over time: `moving`, `still`, `near_feeder`, or `not_visible`.
 - Short, preset Scout replies when the estimate changes.
 - Optional spoken replies using the browser's built-in text-to-speech.
 - Simulated scent-hunt controls in the page for demonstrating the product flow without a dog or camera.
@@ -33,7 +33,7 @@ The current software only prototypes parts of this idea. It does not include the
 - `near_feeder` means the detected dog is near a configured region of the image. It does not confirm that food was eaten or that the dog interacted with a device.
 - Scout's replies are preset text. This is not a live conversational AI agent.
 - It does not record video, save a behavior timeline, send alerts, or run as a background service.
-- Camera analysis runs only while the local site and Python server are running and the camera preview is active.
+- Camera analysis runs only while the page is open and the camera preview is active. The local version sends frames to localhost; the Vercel version sends them to Vercel.
 - This prototype has not been evaluated for accuracy, animal welfare, or unattended use. Do not rely on it for safety or health monitoring.
 
 ## Project files
@@ -43,6 +43,7 @@ The current software only prototypes parts of this idea. It does not include the
 | `index.html` | Website, Scout interface, local camera preview, simulated scent hunt, and browser-side frame sending. |
 | `server.py` | FastAPI server, YOLO11 dog detection, simple activity estimates, and Scout response text. |
 | `requirements.txt` | Python packages needed by the local server. |
+| `vercel.json` | Vercel Python function configuration and deployment file selection. |
 | `train.py` | Experimental dog-pose fine-tuning script. It is not required to run the current prototype, and the current `server.py` does not load its output. |
 | `init.py` | Separate hackathon environment/setup script; it is not needed to run SniffStation locally. |
 
@@ -76,13 +77,13 @@ The simulated scent-hunt controls can be used separately to demonstrate the inte
 
 ## Camera and privacy notes
 
-When run locally, the browser sends sampled image frames to the Python server on the same computer. The current server analyzes frames in memory and does not intentionally save them. The browser preview and model analysis stop when monitoring is stopped or the page is closed.
+When run locally, the browser sends sampled image frames to the Python server on the same computer. In the Vercel deployment, the browser sends snapshots to the hosted Python service for analysis. The application code analyzes frames in memory and does not intentionally save them. The camera and analysis stop when monitoring is stopped or the page is closed.
 
-This local setup is not a remote or deployed monitoring system. Do not expose the development server to the public internet or treat the prototype as an unattended safety device.
+The prototype has no login or owner authentication. Do not use it for private camera feeds, safety monitoring, or unattended care. It is a public concept demo, not a production monitoring service.
 
 ## Current technical approach
 
-The active server loads `yolo11n.pt`, a pretrained object detector. It filters detections to the COCO `dog` class, then estimates movement from changes in the dog's detected position. Feeder proximity is calculated from a configurable image coordinate in `server.py` (`FEEDER_X`, `FEEDER_Y`, and `FEEDER_RADIUS`). Change these values to match where the feeder appears in the camera image.
+The active server loads `yolo11n.pt`, a pretrained object detector. It filters detections to the COCO `dog` class and returns the dog's image position. The browser estimates movement and feeder proximity. The feeder area is currently a fixed image region in `index.html` (`feeder` coordinates); change those values to match the camera view.
 
 The included `train.py` is an experiment that fine-tunes a dog-pose model for 60 epochs. It is not on the active inference path: the running server uses YOLO11 object detection and does not read the pose-training checkpoint. Running `train.py` is unnecessary for the current app and can take a long time.
 

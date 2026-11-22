@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "server.py": {
+      "maxDuration": 60,
+      "includeFiles": "{index.html,yolo11n.pt}",
+      "excludeFiles": "{init.py,submit.py,train.py,datasets/**,runs/**,__pycache__/**,yolo26n-pose.pt}"
+    }
+  }
+}
